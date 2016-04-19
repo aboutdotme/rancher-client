@@ -111,6 +111,11 @@ opts.command('upgrade')
         required: false,
         help: "Specify the services to upgrade",
     })
+    .option('tag', {
+        abbr: 't',
+        help: "Change the image tag for the given services",
+        required: false,
+    })
     .callback(upgrade)
 
 
@@ -146,23 +151,19 @@ class RancherApi {
                 let url = this.url + '/v1/projects'
                 this.getItem('environment', url, callback)
             },
-            // Save the project data back to this instance
             (project, callback) => {
+                // Save the project data back to this instance
                 this.project = project
-                callback()
-            },
-            // Get the environment (stack) data
-            (callback) => {
+
+                // Get the environment (stack) data
                 let url = this.project.links.environments
                 this.getItem('stack', url, callback)
             },
             // Save the environment data back to this instance
             (environment, callback) => {
                 this.environment = environment
-                callback()
-            },
-            // Get our rancher-compose files
-            (callback) => {
+
+                // Get our rancher-compose files
                 let url = this.environment.links.composeConfig
                 debug(url)
                 request.get(url, this.request_opts)
@@ -211,6 +212,12 @@ class RancherApi {
 
                 callback()
             },
+            // If we have a docker tag update, we update the compose file
+            (callback) => {
+                if (!this.tag) return callback()
+                this.updateComposeTag(this.tag)
+                callback()
+            },
             // Pull new images
             (callback) => {
                 let cmd = ['pull']
@@ -243,6 +250,7 @@ class RancherApi {
         })
     }
 
+    // Helper to run a rancher-compose command with args
     compose (args, callback) {
         // Build our base params, which are needed for auth, etc.
         let cmd = [
@@ -270,6 +278,7 @@ class RancherApi {
         })
     }
 
+    // Helper to make simple GET requests to the Rancher API
     apiGet (url, callback) {
         request.get(url, this.request_opts, (err, response, data) => {
             if (err) return callback(err)
@@ -281,6 +290,9 @@ class RancherApi {
         })
     }
 
+    // Hit the Rancher API looking for a matching entry in the response list.
+    // The response looks a bit like {data: [{name: 'item1'}]} so we search
+    // through that for a matching name.
     getItem (type, url, callback) {
         debug(type)
         debug(url)
@@ -315,6 +327,39 @@ class RancherApi {
             callback(null, items[0])
         })
 
+    }
+
+    // Update the docker-compose file for our services to use `tag`
+    updateComposeTag (tag) {
+        // Read our docker-compose file
+        let compose = fs.readFileSync('docker-compose.yml', 'utf8')
+        compose = yaml.safeLoad(compose)
+
+        // Update the tags for our services
+        _.forEach(this.services, (service) => {
+            let image = compose[service].image
+            if (!image) {
+                debug(`Skipping '${service}', it doesn't use an image.`)
+                return
+            }
+            // Split the image name
+            image = image.split(':')
+
+            // Remove the current tag
+            if (image.length >= 2) image.pop()
+
+            // Add the new tag
+            image.push(tag)
+
+            // Save it back to the compose file
+            compose[service].image = image.join(':')
+        })
+
+        debug(compose)
+
+        // Write the compose file back
+        compose = yaml.safeDump(compose)
+        fs.writeFileSync('docker-compose.yml', compose)
     }
 }
 
