@@ -18,6 +18,30 @@ Options:
    -t, --tag           Change the image tag for the given services
 ```
 
+##### Example Commands
+
+Upgrade using a rancher.yml configuration file (as below):
+
+`$ docker run -it --rm -v "$(pwd)/rancher.yml:/usr/src/app/rancher.yml" rancher-client upgrade --config rancher.yml`
+
+Upgrade with DEBUG output, using a configuration file:
+
+`$ docker run -it --rm -v "$(pwd)/rancher.yml:/usr/src/app/rancher.yml" -e DEBUG=* rancher-client upgrade --config rancher.yml`
+
+Upgrade with command line options:
+
+```bash
+$ docker run -it --rm rancher-client upgrade \
+    --environment Demo \
+    --stack Test \
+    --access-key FFFFFFFFFFFFFFFFFFFF \
+    --secret-key FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
+    --url https://rancher.domain \
+    --tag latest \
+    Service1 \
+    Service2
+```
+
 ##### Example Configuration Files
 
 **YAML**
@@ -30,7 +54,8 @@ secret_key: FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 url: 'https://rancher.domain'
 tag: latest
 services:
-  - Test
+  - Service1
+  - Service2
 ```
 
 **JSON**
@@ -42,7 +67,10 @@ services:
   "secret_key": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
   "url": "https://rancher.domain",
   "tag": "latest",
-  "services": ["Test"]
+  "services": ["Service1", "Service2"]
 }
 ```
 
+##### TODO
+
+- Fix image name in example commands.
