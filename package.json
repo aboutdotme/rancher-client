@@ -12,7 +12,7 @@
     "url": "git+https://github.com/aboutdotme/rancher-client.git"
   },
   "author": "Jake Alheid <shakefu@gmail.com>",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/aboutdotme/rancher-client/issues"
   },
