@@ -1,2 +1,2 @@
 # rancher-client
-A dockerize rancher client
+Rancher API client for containerized administration
