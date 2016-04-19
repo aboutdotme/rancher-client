@@ -1,0 +1,10 @@
+{
+  "environment": "Demo",
+  "stack": "Test",
+  "access_key": "FFFFFFFFFFFFFFFFFFFF",
+  "secret_key": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+  "url": "https://rancher.domain",
+  "tag": "latest",
+  "services": ["Test"]
+}
+
