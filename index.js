@@ -5,10 +5,6 @@
  * This script helps work with the Rancher API to make running rancher-compose
  * as seamless as possible.
  *
- * ## TODO:
- *
- * - Add optional docker tag flag for changing the docker tag before upgrading
- *
  */
 // System
 const fs = require('fs')
@@ -229,7 +225,7 @@ class RancherApi {
                 let cmd = [
                     'up',
                     '-d',
-                    '-c',  // TODO, make finishing optional
+                    '-c',
                     '--pull',
                     '--upgrade',
                     '--force-upgrade',
