@@ -265,6 +265,10 @@ class RancherApi {
         let child = spawn('rancher-compose', cmd)
         child.stdout.on('data', (buf) => { debug(_.trim(buf.toString())) })
         child.stderr.on('data', (buf) => { debug(_.trim(buf.toString())) })
+        child.on('error', () => {
+            error("Failed to start rancher-compose.")
+            process.exit(1)
+        })
         child.on('close', (code) => {
             if (code) {
                 let err = new Error(`rancher-compose exited with: ${code}`)
