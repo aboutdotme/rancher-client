@@ -259,7 +259,7 @@ class RancherApi {
         // Append our supplied args
         cmd = _.concat(cmd, args)
 
-        debug('rancher-compose' + cmd.join(' '))
+        debug('rancher-compose ' + cmd.join(' '))
 
         // Call rancher-compose with args
         let child = spawn('rancher-compose', cmd)
