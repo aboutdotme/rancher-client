@@ -16,7 +16,14 @@ Options:
    --secret-key        Specify Rancher API secret key
    --url               Specify the Rancher API endpoint URL
    -t, --tag           Change the image tag for the given services
+   -u, --docker-user   Docker Hub user name
+   -p, --docker-pass   Docker Hub password
+   -d, --dry-run       Don't make any actual changes
 ```
+
+If `--docker-user` and `--docker-pass` are specified, the rancher-client will
+attempt to check if the specified images and tags exist on Docker Hub before
+updating Rancher to prevent accidentally breaking the services.
 
 ##### Example Commands
 
@@ -37,6 +44,8 @@ $ docker run -it --rm aboutdotme/rancher-client upgrade \
     --access-key FFFFFFFFFFFFFFFFFFFF \
     --secret-key FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
     --url https://rancher.domain \
+    --docker-user username \
+    --docker-pass somepass \
     --tag latest \
     Service1 \
     Service2
@@ -53,6 +62,8 @@ access_key: FFFFFFFFFFFFFFFFFFFF
 secret_key: FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 url: 'https://rancher.domain'
 tag: latest
+docker_user: username
+docker_passs: somepass
 services:
   - Service1
   - Service2
@@ -66,6 +77,8 @@ services:
   "access_key": "FFFFFFFFFFFFFFFFFFFF",
   "secret_key": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
   "url": "https://rancher.domain",
+  "docker_user": "username",
+  "docker_pass": "somepass",
   "tag": "latest",
   "services": ["Service1", "Service2"]
 }
