@@ -112,6 +112,25 @@ opts.command('upgrade')
         help: "Change the image tag for the given services",
         required: false,
     })
+    .option('docker_user', {
+        full: 'docker-user',
+        abbr: 'u',
+        required: false,
+        help: "Docker Hub user name"
+    })
+    .option('docker_pass', {
+        full: 'docker-pass',
+        abbr: 'p',
+        required: false,
+        help: "Docker Hub password"
+    })
+    .option('dry_run', {
+        full: 'dry-run',
+        abbr: 'd',
+        flag: true,
+        required: false,
+        help: "Don't make any actual changes"
+    })
     .callback(upgrade)
 
 
@@ -211,7 +230,13 @@ class RancherApi {
             // If we have a docker tag update, we update the compose file
             (callback) => {
                 if (!this.tag) return callback()
-                this.updateComposeTag(this.tag)
+                this.updateComposeTag(this.tag, callback)
+            },
+            // Abort if we're doing a dry-run
+            (callback) => {
+                if (this.dry_run) {
+                    process.exit(0)
+                }
                 callback()
             },
             // Pull new images
@@ -330,10 +355,13 @@ class RancherApi {
     }
 
     // Update the docker-compose file for our services to use `tag`
-    updateComposeTag (tag) {
+    updateComposeTag (tag, callback) {
         // Read our docker-compose file
         let compose = fs.readFileSync('docker-compose.yml', 'utf8')
         compose = yaml.safeLoad(compose)
+
+        // List of modified images
+        let images = []
 
         // Update the tags for our services
         _.forEach(this.services, (service) => {
@@ -351,15 +379,110 @@ class RancherApi {
             // Add the new tag
             image.push(tag)
 
+            // Get the full image name
+            image = image.join(':')
+
+            // Hang on to it so we can check it
+            images.push(image)
+
             // Save it back to the compose file
-            compose[service].image = image.join(':')
+            compose[service].image = image
         })
 
         debug(compose)
 
-        // Write the compose file back
-        compose = yaml.safeDump(compose)
-        fs.writeFileSync('docker-compose.yml', compose)
+        if (!this.docker_user || !this.docker_pass) {
+            // No credentials exist, so no check needed for image existence
+            // Write the compose file back
+            compose = yaml.safeDump(compose)
+            fs.writeFileSync('docker-compose.yml', compose)
+            return callback()
+        }
+
+        // Check if our images exist
+        this.dockerLogin((err) => {
+            if (err) return callback(err)
+            async.filter(images, this.checkImage.bind(this), (err, results) => {
+                // If we have anything in the results, then it's an image that
+                // doesn't exist
+                if (!_.isEmpty(results)) {
+                    error(`Missing images: ${results.join(', ')}`)
+                    process.exit(1)
+                }
+                // Write the compose file back
+                compose = yaml.safeDump(compose)
+                fs.writeFileSync('docker-compose.yml', compose)
+                callback()
+            })
+        })
+    }
+
+    dockerLogin(callback) {
+        // Don't make a request if we already have the token
+        if (this.docker_token) {
+            return callback()
+        }
+        // Build our request options to get a JWT token
+        let options = {
+            uri: 'https://hub.docker.com/v2/users/login/',
+            json: true,
+            formData: {
+                username: this.docker_user,
+                password: this.docker_pass,
+            },
+        }
+        request.post(options, (err, response, body) => {
+            if (err) return callback(err)
+            if (!body.token) {
+                return callback(new Error("JWT token not found in body"))
+            }
+            this.docker_token = body.token
+            debug(`${this.docker_token.slice(0,32)}...`)
+            callback()
+        })
+    }
+
+    checkImage(image, callback) {
+        let tag = 'latest'
+        image = image.split(':')
+        tag = image[1] || tag
+        image = image[0]
+
+        if (!this.docker_token) {
+            return false
+        }
+
+        debug(`Checking ${image}:${tag} ...`)
+        async.waterfall([
+            // Hit the API to check if our tag exists
+            (callback) => {
+                let uri = (`https://hub.docker.com/v2/repositories/${image}` +
+                    `/tags/${tag}`)
+                let options = {
+                    uri: uri,
+                    json: true,
+                    headers: {
+                        Authorization: `JWT ${this.docker_token}`,
+                    },
+                }
+                debug(uri)
+                request.get(options, callback)
+            },
+            (response, body, callback) => {
+                debug(body)
+                // If the tag wasn't found, we get on up
+                if (body.detail == 'Not found' || body.name != tag) {
+                    return callback(null, true)
+                }
+                callback(null, false)
+            },
+        ], (err, result) => {
+            if (err) {
+                error(err)
+                process.exit(1)
+            }
+            callback(null, result)
+        })
     }
 }
 
