@@ -35,10 +35,12 @@ function info () {
 /**
  * Echos warn messages to the user.
  */
+/*
 function warn () {
     let args = _.map(_.slice(arguments), (arg) => colors.yellow(arg))
     console.log.apply(console.log, args)
 }
+*/
 
 
 /**
@@ -107,7 +109,7 @@ opts.command('upgrade')
         required: false,
         help: "Specify the services to upgrade",
         transform: function parseServices (services) {
-            parsed = []
+            let parsed = []
             // We may get comma separated service names like serviceA,serviceB
             // so we want to make sure those work out as well
             _.forEach(services, (service) => {
@@ -498,7 +500,8 @@ class RancherApi {
 
 
 /**
- * Return a config object based on merging the config file if specified and parameters given.
+ * Return a config object based on merging the config file if specified and
+ * parameters given.
  */
 function makeConfig (args) {
     // Create our base configuation, which is empty
