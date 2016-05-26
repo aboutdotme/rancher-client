@@ -106,6 +106,16 @@ opts.command('upgrade')
         list: true,
         required: false,
         help: "Specify the services to upgrade",
+        transform: function parseServices (services) {
+            parsed = []
+            // We may get comma separated service names like serviceA,serviceB
+            // so we want to make sure those work out as well
+            _.forEach(services, (service) => {
+                service = service.split(',')
+                parsed.push.apply(parsed, service)
+            })
+            return parsed
+        },
     })
     .option('tag', {
         abbr: 't',
