@@ -5,7 +5,8 @@
   "description": "Command line client for working with the Rancher API",
   "main": "index.js",
   "scripts": {
-    "test": "eslint *.js"
+    "test": "eslint *.js",
+    "cli": "node index.js"
   },
   "repository": {
     "type": "git",
