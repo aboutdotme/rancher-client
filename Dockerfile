@@ -6,5 +6,5 @@ RUN curl -s https://releases.rancher.com/compose/$COMPOSE_VERSION/rancher-compos
 
 # ENTRYPOINT ["/usr/local/bin/node", "/usr/src/app/index.js"]
 ENTRYPOINT ["npm", "run"]
-CMD ["cli"]
+CMD ["upgrade"]
 
