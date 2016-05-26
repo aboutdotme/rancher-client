@@ -2,10 +2,8 @@ version: '2'
 services:
   rancher_client:
     build: .
-  environment:
-      NODE_ENV: coyote_testing
-    volumes_from:
-      - nodesecurity
+  volumes_from:
+    - nodesecurity
 
   nodesecurity:
     image: aboutdotme/nodesecurity:latest
