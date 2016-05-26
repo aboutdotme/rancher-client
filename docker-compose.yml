@@ -4,8 +4,6 @@ services:
     build: .
   environment:
       NODE_ENV: coyote_testing
-    links:
-      - mongodb
     volumes_from:
       - nodesecurity
 
