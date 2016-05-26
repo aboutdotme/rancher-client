@@ -2,3 +2,12 @@ version: '2'
 services:
   rancher_client:
     build: .
+  environment:
+      NODE_ENV: coyote_testing
+    links:
+      - mongodb
+    volumes_from:
+      - nodesecurity
+
+  nodesecurity:
+    image: aboutdotme/nodesecurity:latest
