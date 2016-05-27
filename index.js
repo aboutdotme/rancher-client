@@ -108,16 +108,6 @@ opts.command('upgrade')
         list: true,
         required: false,
         help: "Specify the services to upgrade",
-        transform: function parseServices (services) {
-            let parsed = []
-            // We may get comma separated service names like serviceA,serviceB
-            // so we want to make sure those work out as well
-            _.forEach(services, (service) => {
-                service = service.split(',')
-                parsed.push.apply(parsed, service)
-            })
-            return parsed
-        },
     })
     .option('tag', {
         abbr: 't',
@@ -517,6 +507,18 @@ function makeConfig (args) {
             error(`Missing required argument '${opt.full || opt.name}'`)
             process.exit(1)
         }
+
+        if (name === 'services') {
+            debug("Parsing services")
+            debug(val)
+            let services = []
+            _.forEach(val, (service) => {
+                services.push.apply(services, service.split(','))
+            })
+
+            val = services
+        }
+
         config[name] = val
     })
 
