@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "eslint *.js",
-    "upgrade": "node index.js"
+    "upgrade": "node index.js upgrade"
   },
   "repository": {
     "type": "git",
