@@ -18,6 +18,7 @@ Options:
    -t, --tag           Change the image tag for the given services
    -u, --docker-user   Docker Hub user name
    -p, --docker-pass   Docker Hub password
+   -f, --skip-finish   Skip automatic finish of upgrade
    -d, --dry-run       Don't make any actual changes
 ```
 
@@ -47,6 +48,7 @@ $ docker run -it --rm aboutdotme/rancher-client upgrade \
     --docker-user username \
     --docker-pass somepass \
     --tag latest \
+    --skip-finish \
     Service1 \
     Service2
 ```
