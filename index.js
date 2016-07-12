@@ -129,6 +129,7 @@ opts.command('upgrade')
     .option('no_finish', {
         full: 'no-finish',
         abbr: 'n',
+        flag: true,
         required: false,
         help: "Skip automatic finish of upgrade"
     })
