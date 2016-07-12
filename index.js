@@ -126,9 +126,9 @@ opts.command('upgrade')
         required: false,
         help: "Docker Hub password"
     })
-    .option('no_finish', {
-        full: 'no-finish',
-        abbr: 'n',
+    .option('skip_finish', {
+        full: 'skip-finish',
+        abbr: 'f',
         flag: true,
         required: false,
         help: "Skip automatic finish of upgrade"
@@ -266,7 +266,7 @@ class RancherApi {
                     '--interval', '2000',
                 ]
                 // Only finalize the upgrade if we want it
-                if (!this.no_finish) cmd.push('-c')
+                if (!this.skip_finish) cmd.push('-c')
                 cmd = _.concat(cmd, this.services)
                 this.compose(cmd, callback)
             },
