@@ -126,6 +126,12 @@ opts.command('upgrade')
         required: false,
         help: "Docker Hub password"
     })
+    .option('no_finish', {
+        full: 'no-finish',
+        abbr: 'n',
+        required: false,
+        help: "Skip automatic finish of upgrade"
+    })
     .option('dry_run', {
         full: 'dry-run',
         abbr: 'd',
@@ -252,13 +258,14 @@ class RancherApi {
                 let cmd = [
                     'up',
                     '-d',
-                    '-c',
                     '--pull',
                     '--upgrade',
                     '--force-upgrade',
                     '--batch-size', '1',
                     '--interval', '2000',
                 ]
+                // Only finalize the upgrade if we want it
+                if (!this.no_finish) cmd.push('-c')
                 cmd = _.concat(cmd, this.services)
                 this.compose(cmd, callback)
             },
