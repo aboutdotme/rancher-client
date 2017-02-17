@@ -38,25 +38,25 @@ main () {
 # Helper function to confirm that the Rancher CLI will have the information it
 # needs to connect to a Rancher server and do things
 check_env () {
+    if [[ ! -f "$HOME/.docker/config.json" ]]; then
+        error "Missing docker login"
+    fi
+
     # Check if we have a cli.json mounted into the container
     if [[ -f "$HOME/.rancher/cli.json" ]]; then return; fi
 
     # Otherwise check we have all the environment variables we need
     if [[ -z "$RANCHER_URL" ]]; then
-        echo "Missing required environment variable: RANCHER_URL"
-        exit 1
+        error "Missing required environment variable: RANCHER_URL"
     fi
     if [[ -z "$RANCHER_ACCESS_KEY" ]]; then
-        echo "Missing required environment variable: RANCHER_ACCESS_KEY"
-        exit 1
+        error "Missing required environment variable: RANCHER_ACCESS_KEY"
     fi
     if [[ -z "$RANCHER_SECRET_KEY" ]]; then
-        echo "Missing required environment variable: RANCHER_SECRET_KEY"
-        exit 1
+        error "Missing required environment variable: RANCHER_SECRET_KEY"
     fi
     if [[ -z "$RANCHER_ENVIRONMENT" ]]; then
-        echo "Missing required environment variable: RANCHER_ENVIRONMENT"
-        exit 1
+        error "Missing required environment variable: RANCHER_ENVIRONMENT"
     fi
 }
 
