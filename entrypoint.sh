@@ -44,13 +44,13 @@ main () {
 # needs to connect to a Rancher server and do things
 check_env () {
     # Check for docker authentication
-    debug "$(cat "$HOME/.docker/config.json")"
+    debug "$(cat "$HOME/.docker/config.json" 2>/dev/null)"
     if [[ ! -f "$HOME/.docker/config.json" ]]; then
         error "Missing docker login"
     fi
 
     # Check if we have a cli.json mounted into the container
-    debug "$(cat "$HOME/.rancher/cli.json")"
+    debug "$(cat "$HOME/.rancher/cli.json" 2>/dev/null)"
     if [[ -f "$HOME/.rancher/cli.json" ]]; then return; fi
 
     # Otherwise check we have all the environment variables we need
@@ -63,9 +63,9 @@ check_env () {
     if [[ -z "$RANCHER_SECRET_KEY" ]]; then
         error "Missing required environment variable: RANCHER_SECRET_KEY"
     fi
-    if [[ -z "$RANCHER_ENVIRONMENT" ]]; then
-        error "Missing required environment variable: RANCHER_ENVIRONMENT"
-    fi
+    # if [[ -z "$RANCHER_ENVIRONMENT" ]]; then
+    #     error "Missing required environment variable: RANCHER_ENVIRONMENT"
+    # fi
 }
 
 
@@ -112,6 +112,7 @@ upgrade () {
     fi
 
     # Set the environment for the rest of the commands
+    # shellcheck disable=SC2034
     RANCHER_ENVIRONMENT="$environment"
 
     check_arg "$1"
