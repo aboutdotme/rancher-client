@@ -163,6 +163,10 @@ upgrade () {
         output=$($cmd)
         debug "$output"
 
+        if [[ "$output" == "null" ]]; then
+            error "Service not found: $service"
+        fi
+
         local image
         image=${output%%:*}
         image="$image:$docker_tag"
@@ -176,6 +180,7 @@ upgrade () {
 
         # TODO: Figure out credential mounting, or whatever, 'cause this
         # command won't work otherwise
+        # This command requires docker login inside the container
         cmd="rancher --host $host docker pull $image"
 
         # Handle backgrounded or inline output appropriately
