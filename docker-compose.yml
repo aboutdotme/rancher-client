@@ -2,3 +2,14 @@ version: '2'
 services:
   rancher_client:
     build: .
+    # This stuff is for easy development only, DO NOT COMMIT IT
+    # environment:
+    #   RANCHER_URL: ''
+    #   RANCHER_ACCESS_KEY: ''
+    #   RANCHER_SECRET_KEY: ''
+    #   RANCHER_ENVIRONMENT: Staging
+    # volumes:
+    #   - ./entrypoint.sh:/usr/local/bin/entrypoint
+    #   - ~/.rancher/cli.json:/root/.rancher/cli.json
+    #   - ~/.docker/config.json:/root/.docker/config.json
+
