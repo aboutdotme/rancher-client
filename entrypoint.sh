@@ -150,7 +150,8 @@ upgrade () {
     docker_image=""
     for service in $services; do
         check_arg "$service"
-        info "Checking $service"
+        debug "Checking $service"
+        debug "$(cat docker-compose.yml)"
 
         output=$(yaml r docker-compose.yml "services.$service.image")
         debug "$output"
