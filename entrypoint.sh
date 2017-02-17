@@ -8,6 +8,11 @@ main () {
             check_env
             upgrade "$@"
             ;;
+        rollback)
+            shift
+            check_env
+            error "rollback: Not yet implemented."
+            ;;
         rancher)
             shift
             check_env
