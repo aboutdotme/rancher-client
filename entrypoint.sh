@@ -196,7 +196,7 @@ upgrade () {
     # Wait on backgrounded pull processes
     for pid in "${!pids[@]}"; do
         if wait "$pid"; then
-            success "${pids[$pid]}: Image verified to exist"
+            success "${pids[$pid]}: Image verified"
         else
             error "${pids[$pid]}: Image error"
         fi
