@@ -222,6 +222,7 @@ EOF
     # shellcheck disable=SC2086
     rancher up -d --pull --upgrade --force-upgrade $confirm_upgrade --stack "$stack" $services
 
+    success "Upgrade successful"
     exit 0
 }
 
