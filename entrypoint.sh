@@ -38,11 +38,14 @@ main () {
 # Helper function to confirm that the Rancher CLI will have the information it
 # needs to connect to a Rancher server and do things
 check_env () {
+    # Check for docker authentication
+    debug "$(cat "$HOME/.docker/config.json")"
     if [[ ! -f "$HOME/.docker/config.json" ]]; then
         error "Missing docker login"
     fi
 
     # Check if we have a cli.json mounted into the container
+    debug "$(cat "$HOME/.rancher/cli.json")"
     if [[ -f "$HOME/.rancher/cli.json" ]]; then return; fi
 
     # Otherwise check we have all the environment variables we need
