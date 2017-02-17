@@ -67,14 +67,15 @@ check_env () {
 # Runs a service upgrade command with helpers
 upgrade () {
     local RANCHER_ENVIRONMENT
+    local cmd
     local confirm_upgrade
     local docker_image
     local docker_tag
     local environment
     local host
+    local output
     local services
     local stack
-    local output
 
     info "Upgrading $* ..."
 
@@ -156,7 +157,8 @@ upgrade () {
         debug "Checking $service"
         debug "$(cat docker-compose.yml)"
 
-        output=$(yaml r docker-compose.yml "services.$service.image")
+        cmd="yaml r docker-compose.yml services.$service.image"
+        output=$($cmd)
         debug "$output"
 
         local image
@@ -172,7 +174,6 @@ upgrade () {
 
         # TODO: Figure out credential mounting, or whatever, 'cause this
         # command won't work otherwise
-        local cmd
         cmd="rancher --host $host docker pull $image"
 
         # Handle backgrounded or inline output appropriately
