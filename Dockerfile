@@ -12,7 +12,8 @@ ENV RANCHER_CLI_VERSION=v0.4.1 \
     RANCHER_ENVIRONMENT=
 
 # Install dependencies and rancher
-RUN apk add --quiet --no-cache ca-certificates bash docker && \
+RUN apk update && \
+    apk add --quiet --no-cache ca-certificates bash docker && \
     rm /usr/bin/docker?* && \
 	apk add --quiet --no-cache --virtual Dockerfile curl && \
     curl -sSL https://github.com/mikefarah/yaml/releases/download/${YAML_VERSION}/yaml_linux_amd64  > /usr/local/bin/yaml && \
