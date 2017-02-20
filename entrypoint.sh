@@ -11,7 +11,7 @@ main () {
         rollback)
             shift
             check_env
-            error "rollback: Not yet implemented."
+            rollback
             ;;
         rancher)
             shift
@@ -28,9 +28,7 @@ main () {
             ;;
         "bash")
             shift
-            # Create a useful bash prompt when we get into the container
-            export PS1="rancher-${RANCHER_CLI_VERSION} \\$ "
-            /bin/bash "$@"
+            _bash "$@"
             ;;
         *)
             # Default to displaying our help
@@ -40,33 +38,9 @@ main () {
 }
 
 
-# Helper function to confirm that the Rancher CLI will have the information it
-# needs to connect to a Rancher server and do things
-check_env () {
-    # Check for docker authentication
-    debug "$(cat "$HOME/.docker/config.json" 2>/dev/null)"
-    if [[ ! -f "$HOME/.docker/config.json" ]]; then
-        error "Missing docker login"
-    fi
-
-    # Check if we have a cli.json mounted into the container
-    debug "$(cat "$HOME/.rancher/cli.json" 2>/dev/null)"
-    if [[ -f "$HOME/.rancher/cli.json" ]]; then return; fi
-
-    # Otherwise check we have all the environment variables we need
-    if [[ -z "$RANCHER_URL" ]]; then
-        error "Missing required environment variable: RANCHER_URL"
-    fi
-    if [[ -z "$RANCHER_ACCESS_KEY" ]]; then
-        error "Missing required environment variable: RANCHER_ACCESS_KEY"
-    fi
-    if [[ -z "$RANCHER_SECRET_KEY" ]]; then
-        error "Missing required environment variable: RANCHER_SECRET_KEY"
-    fi
-    # if [[ -z "$RANCHER_ENVIRONMENT" ]]; then
-    #     error "Missing required environment variable: RANCHER_ENVIRONMENT"
-    # fi
-}
+###################
+# Command functions
+###################
 
 
 # Runs a service upgrade command with helpers
@@ -234,7 +208,6 @@ services="$services"
 confirm_upgrade="$confirm_upgrade"
 EOF
 )"
-    # TODO don't deploy if service it is in an upgraded state
 
     info "Upgrading $services"
     if [[ -n "$confirm_upgrade" ]]; then
@@ -246,6 +219,85 @@ EOF
 
     success "Upgrade successful"
     exit 0
+}
+
+
+_bash () {
+    # Create a useful bash prompt when we get into the container
+    debug "Setting PS1 for bash shell"
+    export PS1="rancher-${RANCHER_CLI_VERSION} \\$ "
+
+    # Symlink in the development version of the entrypoint script if it exists
+    if [[ -f "/usr/local/src/rancher-client/entrypoint.sh" ]]; then
+        debug "Mounting development entrypoint script"
+        ln -sf /usr/local/src/rancher-client/entrypoint.sh \
+            /usr/local/bin/entrypoint
+    fi
+
+    debug "Launching bash shell"
+    /bin/bash "$@"
+}
+
+
+# Run tests on this container
+_test () {
+    echo "> $(green "0 tests passed")"
+    exit 0
+}
+
+
+# Show help and exit
+_help () {
+    # TODO: Individual command help
+
+    cat << EOF
+Usage: entrypoint.sh <upgrade|rollback|rancher|test|help|bash> [options]"
+
+    upgrade     Upgrade a service to a new image tag
+    rollback    Roll back a service in an upgraded state
+    rancher     Run commands directly using the Rancher CLI
+    help        Display this help
+
+    bash        Drop into a bash shell
+    test        Run the test suite
+
+Read the docs at https://github.com/aboutdotme/rancher-client/ for more details.
+EOF
+    exit 0
+}
+
+
+##################
+# Helper functions
+##################
+
+
+# Helper function to confirm that the Rancher CLI will have the information it
+# needs to connect to a Rancher server and do things
+check_env () {
+    # Check for docker authentication
+    debug "$(cat "$HOME/.docker/config.json" 2>/dev/null)"
+    if [[ ! -f "$HOME/.docker/config.json" ]]; then
+        error "Missing docker login"
+    fi
+
+    # Check if we have a cli.json mounted into the container
+    debug "$(cat "$HOME/.rancher/cli.json" 2>/dev/null)"
+    if [[ -f "$HOME/.rancher/cli.json" ]]; then return; fi
+
+    # Otherwise check we have all the environment variables we need
+    if [[ -z "$RANCHER_URL" ]]; then
+        error "Missing required environment variable: RANCHER_URL"
+    fi
+    if [[ -z "$RANCHER_ACCESS_KEY" ]]; then
+        error "Missing required environment variable: RANCHER_ACCESS_KEY"
+    fi
+    if [[ -z "$RANCHER_SECRET_KEY" ]]; then
+        error "Missing required environment variable: RANCHER_SECRET_KEY"
+    fi
+    # if [[ -z "$RANCHER_ENVIRONMENT" ]]; then
+    #     error "Missing required environment variable: RANCHER_ENVIRONMENT"
+    # fi
 }
 
 
@@ -281,27 +333,13 @@ error () {
 }
 
 
+# Debug output
 debug () {
     # Only output if we have the debug environment variable set
     if [[ -z "$DEBUG" ]]; then return; fi
 
     cyan "${*:-}"
     echo
-}
-
-
-# Run tests on this container
-_test () {
-    echo "> $(green "0 tests passed")"
-    exit 0
-}
-
-
-# Show help and exit
-_help () {
-    # TODO: Fix this before releasing
-    echo "Usage: Read the fucking docs."
-    exit 0
 }
 
 
