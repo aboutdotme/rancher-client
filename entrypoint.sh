@@ -161,6 +161,17 @@ upgrade () {
 
     # debug "$(cat docker-compose.yml)"
 
+    # Iterate services and make sure that all of them are in an upgraded state
+    for service in $services; do
+        output=$(rancher inspect --format '{{.state}}' "$stack/$service")
+        if [[ "$output" != "active" ]]; then
+            error "$stack/$service is not 'active' state, got '$output'
+    Upgrade aborted"
+        fi
+    done
+
+    # Iterate services and check for the image tag existing by pulling to a
+    # Rancher host
     for service in $services; do
         check_arg "$service"
         # debug "Checking $service"
@@ -173,6 +184,7 @@ upgrade () {
             error "Service not found: $service"
         fi
 
+        # Modify the image with the new tag
         local image
         image=${output%%:*}
         image="$image:$docker_tag"
@@ -184,8 +196,6 @@ upgrade () {
 
         info "Pulling $image"
 
-        # TODO: Figure out credential mounting, or whatever, 'cause this
-        # command won't work otherwise
         # This command requires docker login inside the container
         cmd="rancher --host $host docker pull $image"
 
@@ -231,7 +241,8 @@ EOF
         info "   ... and automatically finishing upgrade"
     fi
     # shellcheck disable=SC2086
-    rancher up -d --pull --upgrade --force-upgrade $confirm_upgrade --stack "$stack" $services
+    rancher up -d --pull --upgrade --force-upgrade $confirm_upgrade \
+        --stack "$stack" $services
 
     success "Upgrade successful"
     exit 0
@@ -288,6 +299,7 @@ _test () {
 
 # Show help and exit
 _help () {
+    # TODO: Fix this before releasing
     echo "Usage: Read the fucking docs."
     exit 0
 }
