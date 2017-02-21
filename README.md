@@ -107,7 +107,7 @@ Used to rollback services. Services must be in an "upgraded" state to be rolled
 back. If a service has already finish the upgrade, then use ugprade again to
 change the image tag.
 
-`rancher-client upgrade [confirm] <environment> <stack> <service> [service...]`
+`rancher-client rollback <environment> <stack> <service> [service...]`
 
 #### rancher
 
