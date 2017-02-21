@@ -23,7 +23,7 @@ If you don't need to log into docker, use:
 
 ```bash
 docker run -it --rm -v "$HOME/.rancher:/root/.rancher" \
-    aboutdotme/rancher-client <command> [options]`
+    aboutdotme/rancher-client <command> [options]
 ```
 
 If you need private docker credentials, use:
@@ -33,7 +33,7 @@ If you need private docker credentials, use:
 docker run -it --rm \
     -v "$HOME/.rancher:/root/.rancher" \
     -v "$HOME/.docker:/root/.docker" \
-    aboutdotme/rancher-client <command> [options]`
+    aboutdotme/rancher-client <command> [options]
 ```
 
 This can be aliased for ease of use:
