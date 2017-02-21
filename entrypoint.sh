@@ -11,7 +11,7 @@ main () {
         rollback)
             shift
             check_env
-            rollback
+            rollback "$@"
             ;;
         rancher)
             shift
@@ -45,7 +45,6 @@ main () {
 
 # Runs a service upgrade command with helpers
 upgrade () {
-    local RANCHER_ENVIRONMENT
     local cmd
     local confirm_upgrade
     local docker_image
@@ -71,52 +70,30 @@ upgrade () {
         confirm_upgrade=""
     fi
 
-    # Check that we have all the arguments we need
-    check_arg "$1"
-    environment=$1
+    # Get our environment
+    get_environment "$1"
+    environment="$RANCHER_ENVIRONMENT"
     shift
 
-    # Check if this environment is real
-    output=$(rancher environment ls --format "{{.Environment.Name}}")
-    debug
-    debug "Environments found:"
-    debug "$output"
-    if ! (echo "$output" | grep "^${environment}$" &>/dev/null); then
-        error "Environment not found: $environment"
-    fi
-
-    # Set the environment for the rest of the commands
-    # shellcheck disable=SC2034
-    RANCHER_ENVIRONMENT="$environment"
-
-    check_arg "$1"
-    stack=$1
+    # Get our stack
+    get_stack "$1"
+    stack="$RANCHER_STACK"
     shift
 
-    # Check if the stack is real
-    output=$(rancher stacks ls --format "{{.Stack.Name}}")
-    debug
-    debug "Stacks found:"
-    debug "$output"
-
-    if ! (echo "$output" | grep "^${stack}$" &>/dev/null); then
-        error "Stack not found: $environment/$stack"
-    fi
-
+    # Get our tag
     check_arg "$1"
     docker_tag=$1
     shift
 
-    # Pull the Rancher config from the API
-    info "Retrieving Rancher configuration"
-    rancher export "$stack"
-    if [[ $? -ne 0 ]]; then
-        error "Rancher export failed"
-    fi
+    # Get our service list
+    get_services "$*"
+    services="$RANCHER_SERVICES"
 
-    # Move the config files into the current directory
-    mv "$stack"/* .
-    rmdir "$stack"
+    # Make sure the services are all in an active state
+    check_service_states active "$services"
+
+    # Get the Rancher *-compose files
+    get_config "$stack"
 
     # Find a host
     host=$(rancher host -q | head -1)
@@ -130,19 +107,9 @@ upgrade () {
     # pids="" # For storing backgrounded process pids
     declare -A pids
 
-    services=$*
     docker_image=""
 
     # debug "$(cat docker-compose.yml)"
-
-    # Iterate services and make sure that all of them are in an upgraded state
-    for service in $services; do
-        output=$(rancher inspect --format '{{.state}}' "$stack/$service")
-        if [[ "$output" != "active" ]]; then
-            error "$stack/$service is not 'active' state, got '$output'
-    Upgrade aborted"
-        fi
-    done
 
     # Iterate services and check for the image tag existing by pulling to a
     # Rancher host
@@ -217,7 +184,57 @@ EOF
     rancher up -d --pull --upgrade --force-upgrade $confirm_upgrade \
         --stack "$stack" $services
 
+    if [[ $? -ne 0 ]]; then
+        error "Upgrade failed"
+    fi
+
     success "Upgrade successful"
+    exit 0
+}
+
+
+rollback () {
+    local environment
+    local services
+    local stack
+
+    info "Rolling back $*"
+
+    # Get our environment
+    get_environment "$1"
+    environment="$RANCHER_ENVIRONMENT"
+    shift
+
+    # Get our stack
+    get_stack "$1"
+    stack="$RANCHER_STACK"
+    shift
+
+    # Get the remaining arguments as service names
+    check_arg "$1"
+    services=$*
+
+    # Make sure that we have services specified
+    if [[ -z "$services" ]]; then
+        error "Missing required argument: services"
+    fi
+
+    # Make sure the services are all in an active state
+    check_service_states upgraded "$services"
+
+    # Get the Rancher *-compose files
+    get_config "$stack"
+
+    info "Rolling back $stack/$services"
+
+    # shellcheck disable=SC2086
+    rancher up -d --rollback --stack "$stack" $services
+
+    if [[ $? -ne 0 ]]; then
+        error "Rollback failed"
+    fi
+
+    success "Rollback successful"
     exit 0
 }
 
@@ -308,6 +325,118 @@ check_arg () {
     if [[ ${arg:0:1} == "-" ]]; then
         error "Invalid argument: $arg"
     fi
+}
+
+
+# Get the environment from the passed args
+get_environment () {
+    # Check that we have all the arguments we need
+    check_arg "$1"
+    environment=$1
+    shift
+
+    # Check if this environment is real
+    output=$(rancher environment ls --format "{{.Environment.Name}}")
+    debug
+    debug "Environments found:"
+    debug "$output"
+    if ! (echo "$output" | grep "^${environment}$" &>/dev/null); then
+        error "Environment not found: $environment"
+    fi
+
+    # Set the environment
+    # shellcheck disable=SC2034
+    RANCHER_ENVIRONMENT="$environment"
+}
+
+
+get_stack () {
+    check_arg "$1"
+    stack=$1
+    shift
+
+    # Check if the stack is real
+    output=$(rancher stacks ls --format "{{.Stack.Name}}")
+    debug
+    debug "Stacks found:"
+    debug "$output"
+
+    if ! (echo "$output" | grep "^${stack}$" &>/dev/null); then
+        error "Stack not found: $environment/$stack"
+    fi
+
+    # Set the stack
+    # shellcheck disable=SC2034
+    RANCHER_STACK="$stack"
+}
+
+
+check_service_states () {
+    local services
+    local stack
+    local state
+
+    # Get our state from args
+    state="$1"
+    shift
+
+    # Get our services from args
+    services="$*"
+
+    if [[ -z "$RANCHER_STACK" ]]; then
+        error "Rancher stack name not set"
+    fi
+
+    stack="$RANCHER_STACK"
+
+    debug
+    debug "Service states:"
+    # Iterate services and make sure that all of them are in an upgraded state
+    for service in $services; do
+        output=$(rancher inspect --format '{{.state}}' "$stack/$service")
+        debug "$service: $output"
+        if [[ "$output" != "$state" ]]; then
+            error "$stack/$service is not '$state' state, got '$output'"
+        fi
+    done
+
+}
+
+
+get_services () {
+    local services
+
+    # All these args should be services
+    services="$*"
+
+    # Make sure that we have services specified
+    if [[ -z "$services" ]]; then
+        error "Missing required argument: services"
+    fi
+
+    # Make sure someone didn't try to pass a param as a service
+    for service in $services; do
+        check_arg "$service"
+    done
+
+    export RANCHER_SERVICES="$services"
+}
+
+
+get_config () {
+    local stack
+    stack="$1"
+
+    # Pull the Rancher config from the API
+    info "Retrieving Rancher configuration"
+    rancher export "$stack"
+    if [[ $? -ne 0 ]]; then
+        error "Rancher export failed"
+    fi
+
+    # Move the config files into the current directory
+    mv "$stack"/* .
+    rmdir "$stack"
 }
 
 
