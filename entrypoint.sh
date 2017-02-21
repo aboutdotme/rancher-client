@@ -265,7 +265,7 @@ _test () {
 
 # Show help and exit
 _help () {
-    # TODO: Individual command help
+    # XXX: Individual command help instead of link to docs.
 
     cat << EOF
 Usage: entrypoint.sh <upgrade|rollback|rancher|test|help|bash> [options]"
