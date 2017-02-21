@@ -126,5 +126,18 @@ Passthrough to bash prompt.  Useful for debugging, etc.
 
 Print CLI help.
 
-`rancher-client help`
+```bash
+$ rancher-client help
+Usage: entrypoint.sh <upgrade|rollback|rancher|test|help|bash> [options]"
+
+    upgrade     Upgrade a service to a new image tag
+    rollback    Roll back a service in an upgraded state
+    rancher     Run commands directly using the Rancher CLI
+    help        Display this help
+
+    bash        Drop into a bash shell
+    test        Run the test suite
+
+Read the docs at https://github.com/aboutdotme/rancher-client/ for more details.
+```
 
