@@ -225,6 +225,15 @@ rollback () {
     # Get the Rancher *-compose files
     get_config "$stack"
 
+    # Parse all the services and output their images
+    debug
+    debug "CURRENT IMAGES"
+    for service in $services; do
+        output=$(yaml r docker-compose.yml "services.$service.image")
+        debug "$service  $output"
+    done
+    debug
+
     info "Rolling back $stack/$services"
 
     # shellcheck disable=SC2086
@@ -235,6 +244,22 @@ rollback () {
     fi
 
     success "Rollback successful"
+
+    # If we got this far, output the images again
+
+    # Get the rolled back Rancher *-compose files
+    get_config "$stack"
+
+    # Parse all the services and output their images, again
+    echo
+    echo "ROLLBACK IMAGES"
+    for service in $services; do
+        output=$(yaml r docker-compose.yml "services.$service.image")
+        echo "$service  $output"
+    done
+    echo
+
+
     exit 0
 }
 
@@ -293,14 +318,21 @@ EOF
 # needs to connect to a Rancher server and do things
 check_env () {
     # Check for docker authentication
-    debug "$(cat "$HOME/.docker/config.json" 2>/dev/null)"
+    # Uncommenting these is insecure since it would output these to logs, which
+    # can be vulnerable
+    # debug "$(cat "$HOME/.docker/config.json" 2>/dev/null)"
     if [[ ! -f "$HOME/.docker/config.json" ]]; then
         error "Missing docker login"
+    else
+        debug "Found Docker credentials"
     fi
 
     # Check if we have a cli.json mounted into the container
-    debug "$(cat "$HOME/.rancher/cli.json" 2>/dev/null)"
-    if [[ -f "$HOME/.rancher/cli.json" ]]; then return; fi
+    # debug "$(cat "$HOME/.rancher/cli.json" 2>/dev/null)"
+    if [[ -f "$HOME/.rancher/cli.json" ]]; then
+        debug "Found Rancher credentials"
+        return
+    fi
 
     # Otherwise check we have all the environment variables we need
     if [[ -z "$RANCHER_URL" ]]; then
