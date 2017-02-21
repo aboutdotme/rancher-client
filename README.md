@@ -51,7 +51,7 @@ The default `entrypoint.sh` script contains the following CLI commands.
 
 #### upgrade
 
-Used to upgrade services.
+Used to upgrade services. Services must be in an "active" state to be ugpraded.
 
 Usage:
 
@@ -59,7 +59,11 @@ Usage:
 
 #### rollback
 
-Used to rollback services.  Currently unused.
+Used to rollback services. Services must be in an "upgraded" state to be rolled
+back. If a service has already finish the upgrade, then use ugprade again to
+change the image tag.
+
+`rancher-client upgrade [confirm] <environment> <stack> <service> [service...]`
 
 #### rancher
 
