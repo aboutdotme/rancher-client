@@ -39,7 +39,7 @@ docker run -it --rm \
 This can be aliased for ease of use:
 
 ```bash
-alias rancher-client="docker run -it --rm -v $HOME/.rancher:/root/.rancher" \
+alias rancher-client="docker run -it --rm -v $HOME/.rancher:/root/.rancher \
     -v $HOME/.docker:/root/.docker aboutdotme/rancher-client"
 ```
 
