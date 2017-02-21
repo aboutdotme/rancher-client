@@ -1,6 +1,8 @@
 # rancher-client
 
-Rancher API client for containerized deployments and management.  This tool wraps the rancher cli tool in a Docker image, along with a few other helper tools so that this can be used as a standalone tool.
+Rancher API client for containerized deployments and management.  This tool
+wraps the rancher cli tool in a Docker image, along with a few other helper
+tools so that this can be used as a standalone tool.
 
 Items built into the image:
 
@@ -11,9 +13,43 @@ Items built into the image:
 
 ### Usage
 
-The rancher-client relies on local credentials to be conigured for dockerhub and rancher.  These credential values can all be passed in via environment variables or enabld by mounting configurations in as volumes.
+The rancher-client relies on local credentials to be configured for dockerhub
+and rancher.  These credential values can all be passed in via environment
+variables or enabld by mounting configurations in as volumes.
 
-To enable rancher environment variables, uncomment the following lines in the `docker-compose.yml` file and update them to reflect your environment.
+#### Running via prebuilt image
+
+If you don't need to log into docker, use:
+
+```bash
+docker run -it --rm -v "$HOME/.rancher:/root/.rancher" aboutdotme/rancher-client <command> [options]`
+```
+
+If you need private docker credentials, use:
+
+
+```bash
+docker run -it --rm -v "$HOME/.rancher:/root/.rancher" -v "$HOME/.docker:/root/.docker" aboutdotme/rancher-client <command> [options]`
+```
+
+This can be aliased for ease of use:
+
+```bash
+alias rancher-client='docker run -it --rm -v "$HOME/.rancher:/root/.rancher" -v "$HOME/.docker:/root/.docker" aboutdotme/rancher-client'`
+```
+
+#### Running via checked out repository
+
+To check out the repository and run the commands directly, use:
+
+```bash
+git clone https://github.com/aboutdotme/rancher-client
+cd rancher-client
+docker-compose build
+```
+
+To enable rancher environment variables, uncomment the following lines in the
+`docker-compose.yml` file and update them to reflect your environment.
 
 ```
     #   RANCHER_URL: ''
@@ -22,7 +58,8 @@ To enable rancher environment variables, uncomment the following lines in the `d
     #   RANCHER_ENVIRONMENT: ''
 ```
 
-To enable local credentials, uncomment the following lines in the `docker-compose.yml` file.
+To enable local credentials, uncomment the following lines in the
+`docker-compose.yml` file.
 
 ```
     # volumes:
@@ -31,16 +68,18 @@ To enable local credentials, uncomment the following lines in the `docker-compos
     #   - ~/.docker/config.json:/root/.docker/config.json
 ```
 
-NOTE: If you don't mount in the docker credential file you will not be able to pull any private Docker images.  You will have to login to the container and configure the credentials to work around this issue.
+NOTE: If you don't mount in the docker credential file you will not be able to
+pull any private Docker images.  You will have to login to the container and
+configure the credentials to work around this issue.
 
 To run the rancher-client:
 
-`docker-compose run --rm rancher_client`
+`docker-compose run --rm rancher_client <command> [options]`
 
 To make working with the Docker image easier you can create an alias:
 
 ```
-alias rancher-client="docker run -it --rm rancher_client"
+alias rancher-client="docker-compose run --rm rancher_client"
 ```
 
 Make sure you run the alias from the `rancher-cli` repo.
@@ -73,7 +112,7 @@ Passthrough command to the rancher cli.
 
 #### test
 
-Used to run tests.  Currently unused.
+Used to run container test suite.  Currently unused.
 
 `rancher-client test`
 
@@ -88,3 +127,4 @@ Passthrough to bash prompt.  Useful for debugging, etc.
 Print CLI help.
 
 `rancher-client help`
+
