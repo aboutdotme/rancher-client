@@ -128,7 +128,7 @@ Print CLI help.
 
 ```bash
 $ rancher-client help
-Usage: entrypoint.sh <upgrade|rollback|rancher|test|help|bash> [options]"
+Usage: entrypoint.sh <upgrade|rollback|rancher|test|help|bash> [options]
 
     upgrade     Upgrade a service to a new image tag
     rollback    Roll back a service in an upgraded state
