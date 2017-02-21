@@ -22,20 +22,25 @@ variables or enabld by mounting configurations in as volumes.
 If you don't need to log into docker, use:
 
 ```bash
-docker run -it --rm -v "$HOME/.rancher:/root/.rancher" aboutdotme/rancher-client <command> [options]`
+docker run -it --rm -v "$HOME/.rancher:/root/.rancher" \
+    aboutdotme/rancher-client <command> [options]`
 ```
 
 If you need private docker credentials, use:
 
 
 ```bash
-docker run -it --rm -v "$HOME/.rancher:/root/.rancher" -v "$HOME/.docker:/root/.docker" aboutdotme/rancher-client <command> [options]`
+docker run -it --rm \
+    -v "$HOME/.rancher:/root/.rancher" \
+    -v "$HOME/.docker:/root/.docker" \
+    aboutdotme/rancher-client <command> [options]`
 ```
 
 This can be aliased for ease of use:
 
 ```bash
-alias rancher-client='docker run -it --rm -v "$HOME/.rancher:/root/.rancher" -v "$HOME/.docker:/root/.docker" aboutdotme/rancher-client'`
+alias rancher-client="docker run -it --rm -v $HOME/.rancher:/root/.rancher" \
+    -v $HOME/.docker:/root/.docker aboutdotme/rancher-client"
 ```
 
 #### Running via checked out repository
