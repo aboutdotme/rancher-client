@@ -4,8 +4,8 @@ FROM alpine:latest
 # this Dockerfile at https://github.com/monostream/docker-rancher-cli/.
 
 # Define rancher version
-ENV RANCHER_CLI_VERSION=v0.4.1 \
-    YAML_VERSION=1.5 \
+ENV RANCHER_CLI_VERSION=v0.5.0 \
+    YAML_VERSION=1.6 \
     RANCHER_URL= \
     RANCHER_ACCESS_KEY= \
     RANCHER_SECRET_KEY= \
