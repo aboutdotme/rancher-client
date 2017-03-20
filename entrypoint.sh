@@ -10,7 +10,7 @@ main () {
             ;;
         finish)
             shift
-            check env
+            check_env
             finish "$@"
             ;;
         rollback)
