@@ -8,6 +8,11 @@ main () {
             check_env
             upgrade "$@"
             ;;
+        finish)
+            shift
+            check env
+            finish "$@"
+            ;;
         rollback)
             shift
             check_env
@@ -193,6 +198,62 @@ EOF
 }
 
 
+finish () {
+    local environment
+    local services
+    local stack
+
+    info "Finishing upgrade for $*"
+
+    # Get our environment
+    get_environment "$1"
+    environment="$RANCHER_ENVIRONMENT"
+    shift
+
+    # Get our stack
+    get_stack "$1"
+    stack="$RANCHER_STACK"
+    shift
+
+    # Get the remaining arguments as service names
+    check_arg "$1"
+    services=$*
+
+    # Make sure that we have services specified
+    if [[ -z "$services" ]]; then
+        error "Missing required argument: services"
+    fi
+
+    # Make sure the services are all in an upgraded state
+    check_service_states upgraded "$services"
+
+    # Get the Rancher *-compose files
+    get_config "$stack"
+
+    # Parse all the services and output their images
+    debug
+    debug "CURRENT IMAGES"
+    for service in $services; do
+        output=$(yaml r docker-compose.yml "services.$service.image")
+        debug "$service  $output"
+    done
+    debug
+
+    info "Finish upgrade for $stack/$services"
+
+    # shellcheck disable=SC2086
+    rancher up -d --confirm-upgrade --stack "$stack" $services
+
+    if [[ $? -ne 0 ]]; then
+        error "Finish failed"
+    fi
+
+    success "Finish successful"
+
+    exit 0
+}
+
+
 rollback () {
     local environment
     local services
@@ -219,7 +280,7 @@ rollback () {
         error "Missing required argument: services"
     fi
 
-    # Make sure the services are all in an active state
+    # Make sure the services are all in an upgraded state
     check_service_states upgraded "$services"
 
     # Get the Rancher *-compose files
