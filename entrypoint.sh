@@ -77,7 +77,7 @@ upgrade () {
 
     # Get our environment
     get_environment "$1"
-    environment="$_RANCHER_ENVIRONMENT"
+    environment="$RANCHER_ENVIRONMENT"
     shift
 
     # Get our stack
@@ -207,7 +207,7 @@ finish () {
 
     # Get our environment
     # get_environment "$1"
-    environment="$_RANCHER_ENVIRONMENT"
+    environment="$RANCHER_ENVIRONMENT"
     shift
 
     # Get our stack
@@ -263,7 +263,7 @@ rollback () {
 
     # Get our environment
     get_environment "$1"
-    environment="$_RANCHER_ENVIRONMENT"
+    environment="$RANCHER_ENVIRONMENT"
     shift
 
     # Get our stack
@@ -405,7 +405,7 @@ check_env () {
     if [[ -z "$RANCHER_SECRET_KEY" ]]; then
         error "Missing required environment variable: RANCHER_SECRET_KEY"
     fi
-    # if [[ -z "$_RANCHER_ENVIRONMENT" ]]; then
+    # if [[ -z "$RANCHER_ENVIRONMENT" ]]; then
     #     error "Missing required environment variable: RANCHER_ENVIRONMENT"
     # fi
 }
@@ -437,9 +437,13 @@ get_environment () {
         error "Environment not found: $environment"
     fi
 
+    # We can't use the environment name, we need to use the ID it maps to, so
+    # do this magic to get that.
+    id=$(rancher env | grep $environment | awk '{ print $1 }')
+
     # Set the environment
     # shellcheck disable=SC2034
-    _RANCHER_ENVIRONMENT="$environment"
+    RANCHER_ENVIRONMENT="$id"
 }
 
 
