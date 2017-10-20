@@ -76,8 +76,8 @@ upgrade () {
     fi
 
     # Get our environment
-    # get_environment "$1"
-    environment="$RANCHER_ENVIRONMENT"
+    get_environment "$1"
+    environment="$_RANCHER_ENVIRONMENT"
     shift
 
     # Get our stack
@@ -207,7 +207,7 @@ finish () {
 
     # Get our environment
     # get_environment "$1"
-    environment="$RANCHER_ENVIRONMENT"
+    environment="$_RANCHER_ENVIRONMENT"
     shift
 
     # Get our stack
@@ -262,8 +262,8 @@ rollback () {
     info "Rolling back $*"
 
     # Get our environment
-    # get_environment "$1"
-    environment="$RANCHER_ENVIRONMENT"
+    get_environment "$1"
+    environment="$_RANCHER_ENVIRONMENT"
     shift
 
     # Get our stack
@@ -405,7 +405,7 @@ check_env () {
     if [[ -z "$RANCHER_SECRET_KEY" ]]; then
         error "Missing required environment variable: RANCHER_SECRET_KEY"
     fi
-    # if [[ -z "$RANCHER_ENVIRONMENT" ]]; then
+    # if [[ -z "$_RANCHER_ENVIRONMENT" ]]; then
     #     error "Missing required environment variable: RANCHER_ENVIRONMENT"
     # fi
 }
@@ -439,7 +439,7 @@ get_environment () {
 
     # Set the environment
     # shellcheck disable=SC2034
-    RANCHER_ENVIRONMENT="$environment"
+    _RANCHER_ENVIRONMENT="$environment"
 }
 
 
