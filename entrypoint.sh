@@ -441,6 +441,13 @@ get_environment () {
     # do this magic to get that.
     id=$(rancher env | grep $environment | awk '{ print $1 }')
 
+    # Check if the environment ID exists
+    if ! (echo "$id"); then
+        error "Environment ID not found: $environment"
+    fi
+
+    debug "Found id: $id for environment: $environment"
+
     # Set the environment
     # shellcheck disable=SC2034
     RANCHER_ENVIRONMENT="$id"
