@@ -13,3 +13,8 @@ services:
     #   - ~/.rancher/cli.json:/root/.rancher/cli.json
     #   - ~/.docker/config.json:/root/.docker/config.json
 
+    volumes_from:
+      - nodesecurity
+
+  nodesecurity:
+    image: aboutdotme/nodesecurity:latest
