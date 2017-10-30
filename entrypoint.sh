@@ -206,7 +206,7 @@ finish () {
     info "Finishing upgrade for $*"
 
     # Get our environment
-    # get_environment "$1"
+    get_environment "$1"
     environment="$RANCHER_ENVIRONMENT"
     shift
 
