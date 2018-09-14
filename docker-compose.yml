@@ -12,3 +12,4 @@ services:
     #   - ./entrypoint.sh:/usr/local/bin/entrypoint
     #   - ~/.rancher/cli.json:/root/.rancher/cli.json
     #   - ~/.docker/config.json:/root/.docker/config.json
+
