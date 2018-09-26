@@ -123,6 +123,7 @@ upgrade () {
         # debug "Checking $service"
 
         cmd="yaml r docker-compose.yml services.$service.image"
+        debug "About to run $cmd"
         output=$($cmd)
         debug "$output"
 
