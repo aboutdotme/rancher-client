@@ -114,7 +114,7 @@ upgrade () {
 
     docker_image=""
 
-    debug "$(cat docker-compose.yml)"
+    # debug "$(cat docker-compose.yml)"
 
     # Iterate services and check for the image tag existing by pulling to a
     # Rancher host
@@ -123,7 +123,6 @@ upgrade () {
         # debug "Checking $service"
 
         cmd="yaml r docker-compose.yml services.$service.image"
-        debug "About to run $cmd"
         output=$($cmd)
         debug "$output"
 
