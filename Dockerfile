@@ -5,7 +5,6 @@ FROM alpine:latest
 
 # Define rancher version
 ENV RANCHER_CLI_VERSION=v0.5.0 \
-    YAML_VERSION=1.6 \
     RANCHER_URL= \
     RANCHER_ACCESS_KEY= \
     RANCHER_SECRET_KEY= \
@@ -16,8 +15,6 @@ RUN apk update && \
     apk add --quiet --no-cache ca-certificates bash docker && \
     rm /usr/bin/docker?* && \
 	apk add --quiet --no-cache --virtual Dockerfile curl && \
-    curl -sSL https://github.com/mikefarah/yaml/releases/download/${YAML_VERSION}/yaml_linux_amd64  > /usr/local/bin/yaml && \
-	chmod +x /usr/local/bin/yaml && \
 	curl -sSL "https://github.com/rancher/cli/releases/download/${RANCHER_CLI_VERSION}/rancher-linux-amd64-${RANCHER_CLI_VERSION}.tar.gz" | tar -xz -C /usr/local/bin/ --strip-components=2 && \
 	chmod +x /usr/local/bin/rancher && \
 	apk del Dockerfile && \
@@ -27,6 +24,8 @@ RUN apk update && \
 WORKDIR /workspace
 
 COPY entrypoint.sh /usr/local/bin/entrypoint
+COPY yaml /usr/local/bin/yaml
+RUN chmod +x /usr/local/bin/yaml
 
 ENTRYPOINT ["entrypoint"]
 
