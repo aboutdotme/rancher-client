@@ -114,7 +114,7 @@ upgrade () {
 
     docker_image=""
 
-    # debug "$(cat docker-compose.yml)"
+    debug "$(cat docker-compose.yml)"
 
     # Iterate services and check for the image tag existing by pulling to a
     # Rancher host
